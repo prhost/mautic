@@ -63,10 +63,10 @@ mkdir -p nginx/ssl
 
 # Construir e iniciar
 log_info "Construindo containers..."
-cd .. && docker-compose build
+cd .. && docker compose build
 
 log_info "Iniciando containers..."
-docker-compose up -d
+docker compose up -d
 
 # Aguardar inicialização
 log_info "Aguardando inicialização..."
@@ -74,18 +74,18 @@ sleep 60
 
 # Corrigir permissões do config
 log_info "Corrigindo permissões..."
-docker-compose exec -T mautic chown -R www-data:www-data /var/www/html/config/
-docker-compose exec -T mautic chmod -R 775 /var/www/html/config/
-docker-compose exec -T mautic touch /var/www/html/config/local.php
-docker-compose exec -T mautic chown www-data:www-data /var/www/html/config/local.php
-docker-compose exec -T mautic chmod 664 /var/www/html/config/local.php
+docker compose exec -T mautic chown -R www-data:www-data /var/www/html/config/
+docker compose exec -T mautic chmod -R 775 /var/www/html/config/
+docker compose exec -T mautic touch /var/www/html/config/local.php
+docker compose exec -T mautic chown www-data:www-data /var/www/html/config/local.php
+docker compose exec -T mautic chmod 664 /var/www/html/config/local.php
 
 # Verificar status
 log_info "Verificando status..."
-docker-compose ps
+docker compose ps
 
 echo ""
 log_success "Setup concluído!"
 echo "🌐 Acesse: http://localhost"
-echo "📊 Logs: docker-compose logs -f"
+echo "📊 Logs: docker compose logs -f"
 

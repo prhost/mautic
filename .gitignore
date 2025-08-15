@@ -124,6 +124,8 @@
 
 tests/**/*.sql
 
+.env
+
 /themes/*
 !/themes/aurora
 !/themes/blank

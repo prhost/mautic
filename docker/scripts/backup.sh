@@ -16,7 +16,7 @@ mkdir -p "$BACKUP_DIR"
 
 # Backup do banco de dados
 echo "🗄️ Backup do banco de dados..."
-cd .. && docker-compose exec mysql mysqldump -u root -p"${MYSQL_ROOT_PASSWORD:-rootpassword}" \
+cd .. && docker compose exec mysql mysqldump -u root -p"${MYSQL_ROOT_PASSWORD:-rootpassword}" \
     --single-transaction \
     --routines \
     --triggers \
@@ -32,7 +32,7 @@ docker run --rm \
 
 # Backup do Redis
 echo "🔴 Backup do Redis..."
-docker-compose exec redis redis-cli BGSAVE
+docker compose exec redis redis-cli BGSAVE
 sleep 5
 docker run --rm \
     -v mautic_redis_data:/data \

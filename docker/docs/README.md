@@ -90,21 +90,21 @@ Este script irá:
 cd docker && ./scripts/backup.sh
 
 # Parar containers
-docker-compose down
+docker compose down
 
 # Atualizar código (git pull)
 
 # Reconstruir e iniciar
-docker-compose build --no-cache mautic
-docker-compose up -d
+docker compose build --no-cache mautic
+docker compose up -d
 
 # Migrações
-docker-compose exec -T mautic php bin/console doctrine:schema:update --force --env=prod
-docker-compose exec -T mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+docker compose exec -T mautic php bin/console doctrine:schema:update --force --env=prod
+docker compose exec -T mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
 # Limpar cache e gerar assets
-docker-compose exec -T mautic php bin/console cache:clear --env=prod
-docker-compose exec -T mautic php bin/console mautic:assets:generate --env=prod
+docker compose exec -T mautic php bin/console cache:clear --env=prod
+docker compose exec -T mautic php bin/console mautic:assets:generate --env=prod
 ```
 
 ## Backup e Restauração
@@ -121,18 +121,18 @@ cd docker && ./scripts/backup.sh
 
 ```bash
 # Parar containers
-docker-compose down
+docker compose down
 
 # Restaurar banco de dados
-docker-compose up -d mysql
+docker compose up -d mysql
 sleep 30
-docker-compose exec mysql mysql -u root -p"${MYSQL_ROOT_PASSWORD}" < backup_database.sql
+docker compose exec mysql mysql -u root -p"${MYSQL_ROOT_PASSWORD}" < backup_database.sql
 
 # Restaurar volumes
 docker run --rm -v mautic_data:/data -v /caminho/para/backup:/backup alpine tar xzf /backup/volumes.tar.gz
 
 # Reiniciar todos os containers
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Serviços
@@ -148,7 +148,7 @@ docker-compose up -d
 
 - **mautic_worker**: Worker para processamento de filas
   ```bash
-  docker-compose --profile worker up -d
+  docker compose --profile worker up -d
   ```
 
 ## Volumes Persistentes
@@ -168,40 +168,40 @@ docker-compose up -d
 
 ```bash
 # Todos os serviços
-docker-compose logs -f
+docker compose logs -f
 
 # Serviço específico
-docker-compose logs -f mautic
-docker-compose logs -f mysql
+docker compose logs -f mautic
+docker compose logs -f mysql
 ```
 
 ### Acesso ao Container
 
 ```bash
 # Acessar Mautic
-docker-compose exec mautic bash
+docker compose exec mautic bash
 
 # Acessar MySQL
-docker-compose exec mysql mysql -u root -p
+docker compose exec mysql mysql -u root -p
 
 # Acessar Redis
-docker-compose exec redis redis-cli
+docker compose exec redis redis-cli
 ```
 
 ### Comandos Mautic
 
 ```bash
 # Limpar cache
-docker-compose exec mautic php bin/console cache:clear --env=prod
+docker compose exec mautic php bin/console cache:clear --env=prod
 
 # Gerar assets
-docker-compose exec mautic php bin/console mautic:assets:generate --env=prod
+docker compose exec mautic php bin/console mautic:assets:generate --env=prod
 
 # Executar migrações
-docker-compose exec mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+docker compose exec mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
 # Verificar status
-docker-compose exec mautic php bin/console mautic:status --env=prod
+docker compose exec mautic php bin/console mautic:status --env=prod
 ```
 
 ## Troubleshooting
@@ -211,8 +211,8 @@ docker-compose exec mautic php bin/console mautic:status --env=prod
 Se o Mautic não conseguir escrever no arquivo de configuração:
 
 ```bash
-docker-compose exec mautic chown -R www-data:www-data /var/www/html/config/
-docker-compose exec mautic chmod -R 775 /var/www/html/config/
+docker compose exec mautic chown -R www-data:www-data /var/www/html/config/
+docker compose exec mautic chmod -R 775 /var/www/html/config/
 ```
 
 ### Problemas de Migração
@@ -221,10 +221,10 @@ Se as migrações falharem:
 
 ```bash
 # Atualizar schema primeiro
-docker-compose exec mautic php bin/console doctrine:schema:update --force --env=prod
+docker compose exec mautic php bin/console doctrine:schema:update --force --env=prod
 
 # Depois executar migrações
-docker-compose exec mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+docker compose exec mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 ```
 
 ### Problemas de Conectividade
@@ -232,21 +232,21 @@ docker-compose exec mautic php bin/console doctrine:migrations:migrate --no-inte
 Verificar se todos os containers estão rodando:
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 ### Limpar Tudo e Recomeçar
 
 ```bash
 # Parar e remover containers
-docker-compose down
+docker compose down
 
 # Remover volumes (CUIDADO: perde todos os dados)
 docker volume rm mautic_mysql_data mautic_redis_data mautic_mautic_data mautic_mautic_media
 
 # Reconstruir
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ## Portas
