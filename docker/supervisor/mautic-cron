@@ -1,0 +1,40 @@
+# Mautic Cron Jobs
+# Executar campanhas
+*/5 * * * * mautic cd /var/www/html && php bin/console mautic:campaigns:trigger --env=prod >> /var/log/cron.log 2>&1
+
+# Processar filas de mensagens
+*/5 * * * * mautic cd /var/www/html && php bin/console mautic:messages:send --env=prod >> /var/log/cron.log 2>&1
+
+# Processar webhooks
+*/5 * * * * mautic cd /var/www/html && php bin/console mautic:webhooks:process --env=prod >> /var/log/cron.log 2>&1
+
+# Buscar emails (bounces, unsubscribes)
+*/10 * * * * mautic cd /var/www/html && php bin/console mautic:email:fetch --env=prod >> /var/log/cron.log 2>&1
+
+# Processar relatórios agendados
+0 * * * * mautic cd /var/www/html && php bin/console mautic:reports:scheduler --env=prod >> /var/log/cron.log 2>&1
+
+# Limpeza de manutenção (diariamente às 2h)
+0 2 * * * mautic cd /var/www/html && php bin/console mautic:maintenance:cleanup --env=prod >> /var/log/cron.log 2>&1
+
+# Processar importações
+*/15 * * * * mautic cd /var/www/html && php bin/console mautic:import --env=prod >> /var/log/cron.log 2>&1
+
+# Processar exportações de contatos
+*/15 * * * * mautic cd /var/www/html && php bin/console mautic:contacts:export --env=prod >> /var/log/cron.log 2>&1
+
+# Monitoramento social (se habilitado)
+*/30 * * * * mautic cd /var/www/html && php bin/console mautic:social:monitoring --env=prod >> /var/log/cron.log 2>&1
+
+# Reconstruir campanhas
+0 3 * * * mautic cd /var/www/html && php bin/console mautic:campaigns:rebuild --env=prod >> /var/log/cron.log 2>&1
+
+# Resumir campanhas
+0 4 * * * mautic cd /var/www/html && php bin/console mautic:campaigns:summarize --env=prod >> /var/log/cron.log 2>&1
+
+# Processar broadcasts
+*/5 * * * * mautic cd /var/www/html && php bin/console mautic:broadcasts:send --env=prod >> /var/log/cron.log 2>&1
+
+# Deduplicar contatos (semanalmente)
+0 5 * * 0 mautic cd /var/www/html && php bin/console mautic:contacts:deduplicate --env=prod >> /var/log/cron.log 2>&1
+
