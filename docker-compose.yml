@@ -112,7 +112,7 @@ services:
     restart: unless-stopped
     depends_on:
       - mautic
-    ports:
+    # ports:
       #- "80:80"
       #- "443:443"
     volumes:
