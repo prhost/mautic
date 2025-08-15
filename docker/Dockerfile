@@ -62,8 +62,14 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 # Copiar o resto dos arquivos
 COPY --chown=mautic:mautic . .
 
+# Mudar para o usuário mautic antes de instalar dependências do Node.js
+USER mautic
+
 # Instalar dependências do Node.js
 RUN npm install
+
+# Voltar para root para configurar permissões
+USER root
 
 # Criar diretórios necessários e configurar permissões
 RUN mkdir -p var/cache var/logs var/tmp media && \
@@ -108,4 +114,3 @@ EXPOSE 9000
 
 # Comando padrão
 CMD ["/entrypoint.sh"]
-
