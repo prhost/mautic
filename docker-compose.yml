@@ -1,6 +1,6 @@
 services:
   # Banco de dados MySQL
-  mysql:
+  mautic_mysql:
     image: mysql:8.0
     container_name: mautic_mysql
     restart: unless-stopped
@@ -19,7 +19,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
   # Redis para cache e sessões
-  redis:
+  mautic_redis:
     image: redis:7-alpine
     container_name: mautic_redis
     restart: unless-stopped
@@ -32,18 +32,18 @@ services:
     command: redis-server --appendonly yes
 
   # Aplicação Mautic
-  mautic:
+  mautic_app:
     build:
       context: .
       dockerfile: docker/Dockerfile
     container_name: mautic_app
     restart: unless-stopped
     depends_on:
-      - mysql
-      - redis
+      - mautic_mysql
+      - mautic_redis
     environment:
       # Configurações do banco de dados
-      MAUTIC_DB_HOST: mysql
+      MAUTIC_DB_HOST: mautic_mysql
       MAUTIC_DB_PORT: 3306
       MAUTIC_DB_NAME: ${MYSQL_DATABASE:-mautic}
       MAUTIC_DB_USER: ${MYSQL_USER:-mautic}
@@ -52,7 +52,7 @@ services:
       MAUTIC_DB_SERVER_VERSION: 8.0
       
       # Configurações do Redis
-      MAUTIC_CACHE_HOST: redis
+      MAUTIC_CACHE_HOST: mautic_redis
       MAUTIC_CACHE_PORT: 6379
       
       # Configurações da aplicação
@@ -91,12 +91,20 @@ services:
       APP_DEBUG: ${APP_DEBUG:-0}
       
     volumes:
+      # Volumes para dados persistentes
       - mautic_data:/var/www/html/var
       - mautic_media:/var/www/html/media
       - mautic_logs:/var/www/html/var/logs
       - mautic_cache:/var/www/html/var/cache
       - mautic_tmp:/var/www/html/var/tmp
-      - mautic_files:/var/www/html
+      # Volumes para código-fonte (montagem do código local)
+      - ./:/var/www/html:cached
+      # Excluir diretórios que já têm volumes dedicados
+      - /var/www/html/var
+      - /var/www/html/media
+      - /var/www/html/var/logs
+      - /var/www/html/var/cache
+      - /var/www/html/var/tmp
     networks:
       - mautic_network
     healthcheck:
@@ -106,12 +114,12 @@ services:
       retries: 3
 
   # Nginx como proxy reverso
-  nginx:
+  mautic_nginx:
     image: nginx:alpine
     container_name: mautic_nginx
     restart: unless-stopped
     depends_on:
-      - mautic
+      - mautic_app
     # ports:
       #- "80:80"
       #- "443:443"
@@ -120,7 +128,7 @@ services:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
       - mautic_data:/var/www/html/var:ro
       - mautic_media:/var/www/html/media:ro
-      - mautic_files:/var/www/html:ro
+      - ./:/var/www/html:ro
       - ./docker/nginx/ssl:/etc/nginx/ssl
     networks:
       - mautic_network
@@ -134,19 +142,18 @@ services:
     container_name: mautic_worker
     restart: unless-stopped
     depends_on:
-      - mysql
-      - redis
-      - mautic
+      - mautic_mysql
+      - mautic_redis
     environment:
       # Mesmas variáveis de ambiente do mautic
-      MAUTIC_DB_HOST: mysql
+      MAUTIC_DB_HOST: mautic_mysql
       MAUTIC_DB_PORT: 3306
       MAUTIC_DB_NAME: ${MYSQL_DATABASE:-mautic}
       MAUTIC_DB_USER: ${MYSQL_USER:-mautic}
       MAUTIC_DB_PASSWORD: ${MYSQL_PASSWORD:-mauticpassword}
       MAUTIC_DB_DRIVER: pdo_mysql
       MAUTIC_DB_SERVER_VERSION: 8.0
-      MAUTIC_CACHE_HOST: redis
+      MAUTIC_CACHE_HOST: mautic_redis
       MAUTIC_CACHE_PORT: 6379
       MAUTIC_SECRET_KEY: ${MAUTIC_SECRET_KEY:-your-secret-key-here}
       MAUTIC_SITE_URL: ${MAUTIC_SITE_URL:-http://localhost}
@@ -168,11 +175,20 @@ services:
       APP_ENV: ${APP_ENV:-prod}
       APP_DEBUG: ${APP_DEBUG:-0}
     volumes:
+      # Volumes para dados persistentes
       - mautic_data:/var/www/html/var
       - mautic_media:/var/www/html/media
       - mautic_logs:/var/www/html/var/logs
       - mautic_cache:/var/www/html/var/cache
       - mautic_tmp:/var/www/html/var/tmp
+      # Volumes para código-fonte (montagem do código local)
+      - ./:/var/www/html:cached
+      # Excluir diretórios que já têm volumes dedicados
+      - /var/www/html/var
+      - /var/www/html/media
+      - /var/www/html/var/logs
+      - /var/www/html/var/cache
+      - /var/www/html/var/tmp
     networks:
       - mautic_network
     command: ["php", "bin/console", "messenger:consume", "email", "hit", "failed", "--time-limit=3600", "--memory-limit=512M"]
@@ -193,8 +209,6 @@ volumes:
   mautic_cache:
     driver: local
   mautic_tmp:
-    driver: local
-  mautic_files:
     driver: local
 
 networks:

@@ -56,9 +56,9 @@ cd .. && docker compose down
 log_info "Atualizando imagens Docker..."
 docker compose pull
 
-# Reconstruir a imagem do Mautic
-log_info "Reconstruindo Mautic..."
-docker compose build --no-cache mautic
+# Não precisamos reconstruir a imagem do Mautic a cada atualização
+# já que o código-fonte está montado como volume
+log_info "Pulando reconstrução da imagem Mautic (usando volumes)..."
 
 # Iniciar containers
 log_info "Iniciando containers..."
@@ -67,6 +67,18 @@ docker compose up -d
 # Aguardar inicialização
 log_info "Aguardando inicialização..."
 sleep 30
+
+# Atualizar dependências do Composer
+log_info "Atualizando dependências do Composer..."
+docker compose exec -T mautic composer install --no-dev --optimize-autoloader --no-interaction
+
+# Atualizar dependências do Node.js
+log_info "Atualizando dependências do Node.js..."
+docker compose exec -T mautic npm install
+
+# Compilar assets do Node.js
+log_info "Compilando assets do Node.js..."
+docker compose exec -T mautic npm run build
 
 # Corrigir permissões do config
 log_info "Corrigindo permissões..."

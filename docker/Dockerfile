@@ -52,33 +52,19 @@ RUN addgroup -g 1000 mautic && \
 # Configurar diretórios
 WORKDIR /var/www/html
 
-# Copiar apenas arquivos essenciais primeiro
-COPY --chown=mautic:mautic composer.json composer.lock ./
-COPY --chown=mautic:mautic app/composer.json app/
+# Criar diretórios necessários para volumes
+RUN mkdir -p /var/www/html/app /var/www/html/var/cache /var/www/html/var/logs /var/www/html/var/tmp /var/www/html/media /var/www/html/config
 
-# Instalar dependências do Composer (pular scripts que falham)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+# Não copiamos os arquivos do projeto aqui - serão montados como volumes
 
-# Copiar o resto dos arquivos
-COPY --chown=mautic:mautic . .
+# Definir usuário mautic como proprietário dos diretórios
+RUN chown -R mautic:mautic /var/www/html
 
-# Mudar para o usuário mautic antes de instalar dependências do Node.js
-USER mautic
+# Não instalamos dependências do Node.js aqui - serão instaladas durante o processo de atualização
 
-# Instalar dependências do Node.js
-RUN npm install
-
-# Voltar para root para configurar permissões
-USER root
-
-# Criar diretórios necessários e configurar permissões
-RUN mkdir -p var/cache var/logs var/tmp media && \
-    chown -R mautic:mautic /var/www/html && \
-    chmod -R 777 var/cache var/logs var/tmp media && \
-    chmod -R 775 config/ && \
-    touch config/local.php && \
-    chown www-data:www-data config/local.php && \
-    chmod 664 config/local.php
+# Configurar permissões para os diretórios que serão montados como volumes
+RUN chmod -R 777 var/cache var/logs var/tmp media && \
+    chmod -R 775 config/
 
 # Configurar PHP para produção
 RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini && \
