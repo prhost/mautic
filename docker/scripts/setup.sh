@@ -59,7 +59,7 @@ fi
 # Criar diretórios
 log_info "Criando diretórios..."
 mkdir -p backups
-mkdir -p nginx/ssl
+# mkdir -p nginx/ssl  # Não necessário sem Nginx local
 
 # Construir e iniciar
 log_info "Construindo containers..."
@@ -74,11 +74,11 @@ sleep 60
 
 # Corrigir permissões do config
 log_info "Corrigindo permissões..."
-docker compose exec -T mautic chown -R www-data:www-data /var/www/html/config/
-docker compose exec -T mautic chmod -R 775 /var/www/html/config/
-docker compose exec -T mautic touch /var/www/html/config/local.php
-docker compose exec -T mautic chown www-data:www-data /var/www/html/config/local.php
-docker compose exec -T mautic chmod 664 /var/www/html/config/local.php
+docker compose exec -T mautic_app chown -R www-data:www-data /var/www/html/config/
+docker compose exec -T mautic_app chmod -R 775 /var/www/html/config/
+docker compose exec -T mautic_app touch /var/www/html/config/local.php
+docker compose exec -T mautic_app chown www-data:www-data /var/www/html/config/local.php
+docker compose exec -T mautic_app chmod 664 /var/www/html/config/local.php
 
 # Verificar status
 log_info "Verificando status..."

@@ -107,32 +107,27 @@ services:
       - /var/www/html/var/tmp
     networks:
       - mautic_network
+      - web
     healthcheck:
       test: ["CMD", "php", "-r", "echo 'PHP is running';"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Nginx como proxy reverso
-  mautic_nginx:
-    image: nginx:alpine
-    container_name: mautic_nginx
-    restart: unless-stopped
-    depends_on:
-      - mautic_app
-    # ports:
-      #- "80:80"
-      #- "443:443"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
-      - mautic_data:/var/www/html/var:ro
-      - mautic_media:/var/www/html/media:ro
-      - ./:/var/www/html:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl
-    networks:
-      - mautic_network
-      - web
+  # Nginx como proxy reverso (comentado - usando Nginx Proxy Manager)
+  # mautic_nginx:
+  #   image: nginx:alpine
+  #   container_name: mautic_nginx
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - mautic_app
+  #   volumes:
+  #     - mautic_data:/var/www/html/var:ro
+  #     - mautic_media:/var/www/html/media:ro
+  #     - ./:/var/www/html:ro
+  #   networks:
+  #     - mautic_network
+  #     - web
 
   # Worker para processamento de filas (opcional)
   mautic_worker:
@@ -191,6 +186,7 @@ services:
       - /var/www/html/var/tmp
     networks:
       - mautic_network
+      - web
     command: ["php", "bin/console", "messenger:consume", "email", "hit", "failed", "--time-limit=3600", "--memory-limit=512M"]
     profiles:
       - worker

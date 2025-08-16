@@ -9,7 +9,7 @@ mautic/
 ├── docker/
 │   ├── Dockerfile              # Imagem do Mautic
 │   ├── env.example             # Exemplo de variáveis
-│   ├── nginx/                  # Configurações do Nginx
+│   ├── nginx/                  # Configurações do Nginx (comentado - usando Nginx Proxy Manager)
 │   ├── mysql/                  # Scripts de inicialização do MySQL
 │   ├── supervisor/             # Configurações do Supervisor
 │   ├── scripts/
@@ -142,7 +142,7 @@ docker compose up -d
 - **mautic_app**: Aplicação Mautic (PHP 8.2 + FPM)
 - **mautic_mysql**: Banco de dados MySQL 8.0
 - **mautic_redis**: Cache Redis 7
-- **mautic_nginx**: Proxy reverso Nginx
+- **mautic_nginx**: Proxy reverso Nginx (comentado - usando Nginx Proxy Manager)
 
 ### Container Opcional
 
@@ -251,8 +251,7 @@ docker compose up -d
 
 ## Portas
 
-- **80**: HTTP (Nginx)
-- **443**: HTTPS (Nginx)
+- **9000**: PHP-FPM (Mautic)
 - **3306**: MySQL
 - **6379**: Redis
 

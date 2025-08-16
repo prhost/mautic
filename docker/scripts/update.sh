@@ -70,36 +70,36 @@ sleep 30
 
 # Atualizar dependências do Composer
 log_info "Atualizando dependências do Composer..."
-docker compose exec -T mautic composer install --no-dev --optimize-autoloader --no-interaction
+docker compose exec -T mautic_app composer install --no-dev --optimize-autoloader --no-interaction
 
 # Atualizar dependências do Node.js
 log_info "Atualizando dependências do Node.js..."
-docker compose exec -T mautic npm install
+docker compose exec -T mautic_app npm install
 
 # Compilar assets do Node.js
 log_info "Compilando assets do Node.js..."
-docker compose exec -T mautic npm run build
+docker compose exec -T mautic_app npm run build
 
 # Corrigir permissões do config
 log_info "Corrigindo permissões..."
-docker compose exec -T mautic chown -R www-data:www-data /var/www/html/config/
-docker compose exec -T mautic chmod -R 775 /var/www/html/config/
-docker compose exec -T mautic touch /var/www/html/config/local.php
-docker compose exec -T mautic chown www-data:www-data /var/www/html/config/local.php
-docker compose exec -T mautic chmod 664 /var/www/html/config/local.php
+docker compose exec -T mautic_app chown -R www-data:www-data /var/www/html/config/
+docker compose exec -T mautic_app chmod -R 775 /var/www/html/config/
+docker compose exec -T mautic_app touch /var/www/html/config/local.php
+docker compose exec -T mautic_app chown www-data:www-data /var/www/html/config/local.php
+docker compose exec -T mautic_app chmod 664 /var/www/html/config/local.php
 
 # Executar migrações
 log_info "Executando migrações..."
-docker compose exec -T mautic php bin/console doctrine:schema:update --force --env=prod
-docker compose exec -T mautic php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+docker compose exec -T mautic_app php bin/console doctrine:schema:update --force --env=prod
+docker compose exec -T mautic_app php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
 # Limpar cache
 log_info "Limpando cache..."
-docker compose exec -T mautic php bin/console cache:clear --env=prod
+docker compose exec -T mautic_app php bin/console cache:clear --env=prod
 
 # Gerar assets
 log_info "Gerando assets..."
-docker compose exec -T mautic php bin/console mautic:assets:generate --env=prod
+docker compose exec -T mautic_app php bin/console mautic:assets:generate --env=prod
 
 # Verificar status
 log_info "Verificando status..."
